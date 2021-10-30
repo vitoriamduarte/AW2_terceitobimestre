@@ -1,65 +1,69 @@
 <? php
 
-require_once  'usuarios.php' ;
-$ u = novo  Usuario ;
-?>
+Classe  Usuario {
+
+    private  $ pdo ;
+    public  $ erro = "" ;
+
+public  function  conectar ( $ nome , $ host , $ usuario , $ senha ) {
+global  $ pdo ;
+tente {
+    $ pdo = new  PDO ( "mysql: dbname" . $ nome . "; host =" . $ host , $ usuario , $ senha );
+} catch ( PDOExeption  $ e ) {
+    global  $ erro ;
+    $ erro = $ e -> getMessage ();
+}
+
+}
 
 
-<! DOCTYPE HTML >
-< html >
-    < cabeça >
-        < title > Cadastro </ title >
-    </ head >
-    < corpo >
+public  function  cadastrar ( $ nome , $ telefone , $ email , $ senha ) {
 
-  
-    < form  method = ' post ' >
-    < Entrada  tipo = " texto " espaço reservado =" Nome " nome =" Nome " maxlenght =" 30 " >  < br >
-    < Entrada  tipo = " texto " espaço reservado =" Telefone " nome =" telefone " maxlenght =" 30 " >  < br >
-   < Entrada  tipo = " email " espaço reservado =" Usuario " nome =" email " maxlenght =" 40 " >  < br >
-   < Entrada  tipo = " password " espaço reservado =" Senha " nome =" Senha " maxlenght =" 15 " > < br >
-   < Entrada  tipo = " password " espaço reservado =" Confirmar Senha " nome =" confirmarsenha " maxlenght =" 15 " > < br >
-  < input  type = " submit " name = " Cadastrar " >
-</ form >
-<? php
- if ( isset ( $ _POST [ 'nome' ])) {
+    global  $ pdo ;
+    $ sql = $ pdo -> prepare ( "SELECT id_usuario FROM usuarios WHERE email =: e" );
+    $ sql -> bindValue ( ": e" , $ email );
+    $ sql -> execute ();
+    if ( $ sql -> rowCount ()> 0 ) {
 
-    $ nome = adicionalashes ( $ _POST [ 'nome' ]);
-    $ telefone = adiciona barras ( $ _POST [ 'telefone' ]);
-    $ email = addslashes ( $ _POST [ 'email' ]);
-    $ senha = adicionalashes ( $ _POST [ 'senha' ]);
-    $ confirmarsenha = addslashes ( $ _POST [ 'confirmarsenha' ]);
-
-    if (! empty ( $ nome ) &&! empty ( $ telefone ) &&! empty ( $ email ) &&! empty ( $ senha ) &&! empty ( $ confirmarsenha )) {
-
-$ u -> conectar ( "projeto_loginn" , "localhost" , "root" , "" );
-    if ( $ senha == $ confirmarsenha ) {
-    if ( $ u -> cadastrar ( $ nome , $ telefone , $ email , $ senha ))
-    {
- echo "cadastrado" ;
-
+return  false ;
 
     }
+
     else {
 
-        echo "existente" ;
+$ sql = $ pdo -> prepare ( "INSERT INTO usuarios (nome, telefone, email, senha) VALORES (: n,: t,: e,: s)" );
     }
-    }
-    else {
-
-        echo  "sem correspondencia" ;
-    }
-
-
-  }
-else {
-
-    echo  "Preencha" ;
+    $ sql -> bindValue ( ": n" , $ nome );
+    $ sql -> bindValue ( ": t" , $ telefone );
+    $ sql -> bindValue ( ": e" , $ email );
+    $ sql -> bindValue ( ": s" , md5 ( $ senha ));
+    $ sql -> execute ();
+    return  true ;
 }
-}
+
+ logar de função  pública ( $ email , $ senha ) {
     
+    global  $ pdo ;
+    $ sql = $ pd -> prepare ( "SELECT id_usuario FROM usuarios WHERE email =: e AND senha =: s" );
+    $ sql -> bindValue ( ": e" , $ email );
+    $ sql -> bindValue ( ": s" , md5 ( $ senha ));
+    $ sql -> execute ();
+    if ( $ sql -> rowCount ()> 0 ) {
+
+$ dado = $ sql -> fetch ();
+session_start ();
+$ _SESSION [ 'id_usuario' ] = $ dado [ 'id_usuario' ];
+return  true ;
+
+    }
+
+    else {
+    return  false ;
+}
+}
+
+
+
+}
+
 ?>
-
-
-    </ body >
-</ html >
